@@ -1,5 +1,5 @@
 resource "azurerm_resource_group" "example" {
-  name     = "${var.name_prefix}-rg"
+  name     = "${random_pet.random_prefix.id}-rg"
   location = var.location
 }
 
@@ -7,7 +7,7 @@ resource "azurerm_resource_group" "example" {
 data "azurerm_client_config" "current" {}
 
 resource "azurerm_key_vault" "example" {
-  name                        = "${var.name_prefix}-kv"
+  name                        = "${random_pet.random_prefix.id}-kv"
   location                    = azurerm_resource_group.example.location
   resource_group_name         = azurerm_resource_group.example.name
   sku_name                    = "premium"
@@ -56,7 +56,7 @@ resource "azurerm_key_vault_key" "example" {
 }
 
 resource "azurerm_disk_encryption_set" "example" {
-  name                = "${var.name_prefix}-des"
+  name                = "${random_pet.random_prefix.id}-des"
   resource_group_name = azurerm_resource_group.example.name
   location            = azurerm_resource_group.example.location
   key_vault_key_id    = azurerm_key_vault_key.example.id
@@ -82,21 +82,21 @@ resource "azurerm_key_vault_access_policy" "disk-encryption" {
 
 // Virtual Machine
 resource "azurerm_virtual_network" "example" {
-  name                = "${var.name_prefix}-vnet"
+  name                = "${random_pet.random_prefix.id}-vnet"
   address_space       = ["10.0.0.0/16"]
   location            = azurerm_resource_group.example.location
   resource_group_name = azurerm_resource_group.example.name
 }
 
 resource "azurerm_subnet" "example" {
-  name                 = "${var.name_prefix}-subnet"
+  name                 = "${random_pet.random_prefix.id}-subnet"
   resource_group_name  = azurerm_resource_group.example.name
   virtual_network_name = azurerm_virtual_network.example.name
   address_prefixes     = ["10.0.2.0/24"]
 }
 
 resource "azurerm_network_interface" "example" {
-  name                = "${var.name_prefix}-nic"
+  name                = "${random_pet.random_prefix.id}-nic"
   location            = azurerm_resource_group.example.location
   resource_group_name = azurerm_resource_group.example.name
 
@@ -107,8 +107,8 @@ resource "azurerm_network_interface" "example" {
   }
 }
 
-resource "azurerm_linux_virtual_machine" "test" {
-  name                = "${var.name_prefix}-vm"
+resource "azurerm_linux_virtual_machine" "main" {
+  name                = "${random_pet.random_prefix.id}-vm"
   resource_group_name = azurerm_resource_group.example.name
   location            = azurerm_resource_group.example.location
   
@@ -145,4 +145,8 @@ resource "azurerm_linux_virtual_machine" "test" {
   depends_on = [
     azurerm_key_vault_access_policy.disk-encryption,
   ]
+}
+
+resource "random_pet" "random_prefix" {
+  prefix = var.name_prefix
 }
